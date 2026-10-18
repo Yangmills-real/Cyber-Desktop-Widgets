@@ -87,7 +87,7 @@ pyinstaller --noconsole --onedir --name TrafficMonitor traffic_monitor.py
 # 3. 打包新闻阅读器
 pyinstaller --noconsole --onedir --name NewsReader news_reader.py
 
-# #补充为什么不能用--onefile直接打包：主要是避开微软 Defender 的杀软，单文件打包的原理是，每次双击运行，它都会偷偷在系统的 Temp（临时）文件夹里把自己解压成几十个碎文件，运行完再删掉。这种“偷偷释放文件”的行为，和很多木马病毒的操作手法一模一样，所以 Windows 看到就会弹“已保护你的电脑”。（其实也可，解除一下安全权限就行）
+#补充为什么不能用--onefile直接打包：主要是避开微软 Defender 的杀软，单文件打包的原理是，每次双击运行，它都会偷偷在系统的 Temp（临时）文件夹里把自己解压成几十个碎文件，运行完再删掉。这种“偷偷释放文件”的行为，和很多木马病毒的操作手法一模一样，所以 Windows 看到就会弹“已保护你的电脑”。（其实也可，解除一下安全权限就行）
 
 ---
 ## 四、全局快捷键
