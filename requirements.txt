@@ -1,0 +1,15 @@
+# ------------------------------------------------------------
+# 三个工具的依赖
+# ------------------------------------------------------------
+paramiko>=3.0
+#   traffic_monitor.py / news_reader.py 用（SSH 连接）
+#   会自动带上 cryptography / bcrypt / pynacl
+
+tzdata
+#   TimeClock.py 用。Windows 系统本身不带 IANA 时区数据库，
+#   缺了它会报 ZoneInfoNotFoundError: 'No time zone found with key Asia/Shanghai'
+
+chinesecalendar
+#   TimeClock.py 用（可选）。缺了它时钟照常走，只是中国节假日不上色。
+#   注意：pip 包名是 chinesecalendar（无下划线），import 名是 chinese_calendar（有下划线）
+#   该库目前只覆盖 2004~2026 年，超出年份会自动退化成"只看周末"
