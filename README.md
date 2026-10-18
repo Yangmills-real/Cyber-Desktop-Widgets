@@ -100,7 +100,7 @@ pyinstaller --noconsole --onedir --name TrafficMonitor traffic_monitor.py
 pyinstaller --noconsole --onedir --name NewsReader news_reader.py
 ```
 4.3 产物结构
-```text
+text
 dist/
 ├── TimeClock/
 │   ├── TimeClock.exe
@@ -118,6 +118,7 @@ dist/
 对方解压后双击文件夹里的 `XXX.exe` 即可，不需要安装 Python。
 如果需要 SSH，把私钥放到 exe 所在的同一个文件夹里，或者放 `~/.ssh/`（见第 3 节）。
 首次运行可能被 SmartScreen 提示，点「更多信息 → 仍要运行」。
+```
 ---
 5. 全局快捷键
 三个程序同时开也不会冲突，因为用的是不同的键（基于 `RegisterHotKey` 系统级注册，同一个键只能被一个程序占用）：
