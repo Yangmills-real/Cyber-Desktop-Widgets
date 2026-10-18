@@ -1,4 +1,4 @@
-# VPS 桌面小工具集
+# VPS 桌面小工具集（含一个无需vps的美观桌面时钟）
 
 三个基于 Python + tkinter 的 Windows 桌面悬浮窗，配合一台 Linux VPS 使用。
 都是**无边框、始终置顶、可拖拽**的极简小窗，并且都支持 **一键沉底 + 全局热键唤醒**。
@@ -74,19 +74,21 @@ KEY_NAME = "id_ed25519"
 
 ## 三、打包成 exe
 
+# 先清理一下之前可能残留的垃圾文件
 ```powershell
-pip install pyinstaller
-pyinstaller --onefile --noconsole --name TimeClock TimeClock.py
-pyinstaller --onefile --noconsole --name TrafficMonitor traffic_monitor.py
-pyinstaller --onefile --noconsole --name NewsReader news_reader.py
-```
 
-产物在 `dist\` 下。注意：
+Remove-Item -Recurse -Force build, dist, *.spec -ErrorAction SilentlyContinue
 
-- **不要**用 `--add-data` 把私钥塞进去，那等于把钥匙一起发出去。
-- `TimeClock.py` 如果用到 `chinesecalendar`，建议加 `--collect-data chinesecalendar`。
-- `paramiko` 依赖的 `cryptography` / `bcrypt` / `pynacl` 会被 PyInstaller 自动收集，不用额外参数。
+# 1. 打包双时区时钟（必须带上时区和节假日库）
+pyinstaller --noconsole --onedir --collect-data tzdata --collect-all chinesecalendar --name TimeClock TimeClock.py
 
+# 2. 打包流量监控
+pyinstaller --noconsole --onedir --name TrafficMonitor traffic_monitor.py
+
+# 3. 打包新闻阅读器
+pyinstaller --noconsole --onedir --name NewsReader news_reader.py
+
+#为什么不能用--onefile直接打包：主要是避开微软 Defender 的杀软，单文件打包的原理是，每次双击运行，它都会偷偷在系统的 Temp（临时）文件夹里把自己解压成几十个碎文件，运行完再删掉。这种“偷偷释放文件”的行为，和很多木马病毒的操作手法一模一样，所以 Windows 看到就会弹“已保护你的电脑”。（其实也可，解除一下安全权限就行）
 ---
 
 ## 四、全局快捷键
@@ -105,7 +107,7 @@ pyinstaller --onefile --noconsole --name NewsReader news_reader.py
 
 ---
 
-## 五、提交前自检
+## 五、提交前我的自检
 
 推代码之前，跑一下这段确认没有把真实信息带出去：
 
@@ -120,19 +122,19 @@ Get-ChildItem -Recurse -Filter *.py | Select-String `
   -Pattern '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}','[\w.+-]+@[\w.-]+\.[a-z]{2,}','BEGIN .*PRIVATE KEY'
 ```
 
-**没有任何输出**才安全。再确认一下私钥文件没被加进去：
+**没有任何输出**证明安全。下面是再确认一下私钥文件没被加进去：
 
 ```bash
 git status --short
 git ls-files | grep -Ei 'id_rsa|id_ed25519|\.pem$|\.key$|\.ppk$'   # 应该没输出
 ```
 
-> ⚠️ 一旦某次 commit 里带上了密钥，**即使后来删掉，它仍然留在 git 历史里**。
+> ⚠️ 给所有人的建议：一旦某次 commit 里带上了密钥，**即使后来删掉，它仍然留在 git 历史里**。
 > 那种情况必须先撤销（rotate）那把密钥，再清理历史（`git filter-repo`）。
 
 ---
 
-## 六、说明
+## 五、说明
 
 - 这些工具都是**单文件、零外部配置**的设计，配置写在各文件顶部的常量里，方便直接改。
 - SSH 部分用的是 `paramiko.Transport` 长连接：**只在启动时握手认证一次**，
