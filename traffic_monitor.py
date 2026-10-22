@@ -34,16 +34,39 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog
 
 # ------------------------------------------------------------------
-# 导入 paramiko。如果没装，用弹窗提示（打包成 --noconsole 后看不到命令行输出）
+# 导入 paramiko
 # ------------------------------------------------------------------
+# ★ 这里【故意】用 except Exception 而不是 except ImportError：
+#   打包后最常出问题的不是"没安装"，而是 cryptography 的 DLL 加载失败，
+#   那种情况抛的是 OSError（DLL load failed），用 ImportError 根本接不住。
+#   而且必须把真实异常显示出来，否则只会误导成"没装 paramiko"。
 try:
     import paramiko
-except ImportError:
+except Exception as _exc:                  # noqa: BLE001
+    import traceback
+    _detail = traceback.format_exc()
+
+    # 把完整堆栈写到 exe（或脚本）同目录，方便事后排查
+    try:
+        _base = (os.path.dirname(sys.executable) if getattr(sys, "frozen", False)
+                 else os.path.dirname(os.path.abspath(__file__)))
+        _log_path = os.path.join(_base, "import_error.log")
+        with open(_log_path, "w", encoding="utf-8") as _f:
+            _f.write(_detail)
+    except Exception:
+        _log_path = "(日志写入失败)"
+
     _r = tk.Tk()
     _r.withdraw()
     messagebox.showerror(
-        "缺少依赖",
-        "没有找到 paramiko 库。\n\n请在命令行里执行：\n\n    pip install paramiko")
+        "依赖加载失败",
+        f"paramiko 存在但导入失败。\n\n"
+        f"真实原因：{type(_exc).__name__}: {_exc}\n\n"
+        f"完整堆栈已写入：\n{_log_path}\n\n"
+        f"常见原因：\n"
+        f"  · 打包缓存没清（删掉 build/dist 重新打包）\n"
+        f"  · 系统缺 Visual C++ 运行库\n"
+        f"  · 打包时漏了 --collect-all cryptography")
     sys.exit(1)
 
 # ==================================================================
